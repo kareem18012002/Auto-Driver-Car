@@ -16,10 +16,5 @@ A simple Auto Driver Car robot built using an Esp, L298N motor driver, and Ultra
 
 
 # Creators
--kareem ezat gharib ali
--alaa mohammed elsayed 
--Mohammad Abu Salim Abdullah
--eslam mohammed salah
--Ahmed Ali Qasim
-- Amr Mohamed Abdel Aziz
+
 
