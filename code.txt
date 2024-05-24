@@ -1,0 +1,114 @@
+#include <NewPing.h>
+
+#define SOUND_SPEED 0.034  // سرعة الصوت بالسنتيمتر/ميكروثانية
+
+// تعريف دبابيس التريجر والإيكو للمستشعر
+int TrigPin = 12;  // GPIO18
+int EchoPin = 14;  // GPIO19
+
+// تعريف دبابيس التحكم في المحركات
+int RMFW = 27; // دبوس المحرك الأيمن الأمامي
+int RMBK = 26; // دبوس المحرك الأيمن الخلفي
+int LMFW = 25; // دبوس المحرك الأيسر الأمامي
+int LMBK = 33; // دبوس المحرك الأيسر الخلفي
+
+// حالة الحركة
+enum MovementState {
+  FORWARD,
+  TURN_RIGHT,
+  TURN_LEFT,
+  BACKWARD
+};
+
+// حالة الحركة الحالية
+MovementState movementState = BACKWARD;
+
+void setup() {
+  // إعداد المنفذ التسلسلي
+  Serial.begin(115200);
+
+  // إعداد دبابيس المستشعر
+  pinMode(TrigPin, OUTPUT);
+  pinMode(EchoPin, INPUT);
+
+  // إعداد دبابيس المحركات كدبابيس خرج
+  pinMode(RMFW, OUTPUT);
+  pinMode(RMBK, OUTPUT);
+  pinMode(LMFW, OUTPUT);
+  pinMode(LMBK, OUTPUT);
+
+  
+}
+
+void loop() {
+  // إرسال نبضة التريجر
+  digitalWrite(TrigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TrigPin, LOW);
+
+  // قراءة نبضة الإيكو وحساب المدة
+  long duration = pulseIn(EchoPin, HIGH);
+
+  // حساب المسافة بالسنتيمتر
+  float distance = duration * SOUND_SPEED / 2;
+
+  // طباعة المسافة للمنفذ التسلسلي
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // اتخاذ قرار الحركة بناءً على المسافة
+  if (distance >= 30) {
+    if (movementState != FORWARD) {
+      movementState = FORWARD;
+      moveForward();
+    }
+  } else if (distance >= 20) {
+    if (movementState != TURN_RIGHT) {
+      movementState = TURN_RIGHT;
+      turnRight();
+    }
+  } else {
+    if (movementState != BACKWARD) {
+      movementState = BACKWARD;
+      moveBackward();
+    }
+  }
+
+  // تأخير قبل القراءة التالية
+  delay(100);
+}
+
+// تحريك الروبوت إلى الأمام
+void moveForward() {
+  digitalWrite(RMFW, HIGH);
+  digitalWrite(RMBK, LOW);
+  digitalWrite(LMFW, HIGH);
+  digitalWrite(LMBK, LOW);
+}
+
+// تحريك الروبوت للخلف
+void moveBackward() {
+  digitalWrite(RMFW, LOW);
+  digitalWrite(RMBK, HIGH);
+  digitalWrite(LMFW, LOW);
+  digitalWrite(LMBK, HIGH);
+}
+
+// تحريك الروبوت لليمين
+void turnRight() {
+  digitalWrite(RMFW, LOW);
+  digitalWrite(RMBK, HIGH);
+  digitalWrite(LMFW, HIGH);
+  digitalWrite(LMBK, LOW);
+}
+
+// تحريك الروبوت لليسار
+void turnLeft() {
+  digitalWrite(RMFW, HIGH);
+  digitalWrite(RMBK, LOW);
+  digitalWrite(LMFW, LOW);
+  digitalWrite(LMBK, HIGH);
+}
